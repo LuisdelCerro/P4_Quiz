@@ -46,7 +46,7 @@ const biglog = (socket,msg, color) => {
  * @param emsg Texto del mensaje de error.
  */
 const errorlog = (socket,emsg) => {
-    socket.write(`${colorize("Error", "red")}: ${colorize(colorize(emsg, "red"), "bgYellowBright")} \n`);
+    socket.write(`${colorize("Error", "red")}: ${colorize(colorize(emsg, "red"), "bgYellowBright")} \n \r`);
 };
 
 

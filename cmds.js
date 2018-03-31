@@ -100,7 +100,7 @@ exports.showCmd = (socket,rl, id) => {
  * @param text Pregunta que hay que hacerle al usuario.
  */
 
-const makeQuestion = (socket,rl, text) => {
+const makeQuestion = (rl, text) => {
 
     return new Sequelize.Promise((resolve, reject) => {
         rl.question(colorize(text, 'red'), answer => {
@@ -229,9 +229,10 @@ exports.creditsCmd = (socket,rl) => {
  *
  * @param rl Objeto readline usando para implementar el CLI
  */
-exports.quitCmd = (rl,socket) => {
+exports.quitCmd = (socket,rl) => {
     rl.close();
     socket.end();
+
 };
 
 /**
@@ -246,19 +247,19 @@ exports.testCmd = (socket,rl,id) => {
         .then(id => models.quiz.findById(id))
         .then(quiz => {
             if (!quiz) {
-                throw new Error(`No existe un quiz asociado al id=${id}.`);
+                errorlog(socket, `No existe un quiz asociado al id=${id}.`);
+                rl.prompt();
             }
-
-            return makeQuestion(rl, quiz.question)
+            else return makeQuestion(rl, quiz.question)
                 .then(answer => {
 
                     respuesta = answer.toLowerCase().trim();
                     solución = quiz.answer.toLowerCase();
                     if (respuesta === solución) {
-                        log(socket,'Su respuesta es correcta', 'green');
+                        log(socket, 'Su respuesta es correcta', 'green');
                     }
                     else {
-                        log(socket,'Su respuesta es incorrecta', 'red');
+                        log(socket, 'Su respuesta es incorrecta', 'red');
                     }
                 })
         .catch(Sequelize.ValidationError, error => {
