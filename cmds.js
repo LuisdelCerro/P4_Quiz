@@ -50,14 +50,16 @@ exports.listCmd = (socket,rl) => {
  * @param id Parametro con el indice a validar.
  */
 
-const validateId = id => {
+const validateId = (id,socket) => {
     return new Sequelize.Promise((resolve, reject) => {
         if (typeof id === "undefined"){
+            errorlog(socket,`Falta el parametro <id>.`);
             reject(new Error(`Falta el parametro <id>.`));
         } else {
             id = parseInt(id); //coger la parte entera y descartar lo demas
             if (Number.isNaN(id)) {
-                reject(new Error(`El valor del parámetro <id> no es un número`))
+                errorlog(socket,`El valor del parámetro <id> no es un número`);
+                reject(new Error(`El valor del parámetro <id> no es un número`));
             }else{
                 resolve(id);
             }
@@ -71,7 +73,7 @@ const validateId = id => {
  * @param id Clave del quiz a mostrar
  */
 exports.showCmd = (socket,rl, id) => {
-    validateId(id)
+    validateId(id,socket)
         .then(id => models.quiz.findById(id))
         .then(quiz => {
             if (!quiz) {
@@ -151,8 +153,8 @@ exports.addCmd = (socket,rl) => {
  * @param rl Objeto readline usando para implementar el CLI
  * @param id Clave del quiz a borrar en el modelo.
  */
-exports.deleteCmd = (rl,id) => {
-    validateId(id)
+exports.deleteCmd = (socket,rl,id) => {
+    validateId(id,socket)
         .then(id => models.quiz.destroy({where: {id}}))
         .catch(error => {
             errorlog(socket,error.message);
@@ -174,7 +176,7 @@ exports.deleteCmd = (rl,id) => {
  * @param id Clave del quiz a editar en el modelo.
  */
 exports.editCmd = (socket,rl, id) => {
-    validateId(id)
+    validateId(id,socket)
         .then(id => models.quiz.findById(id))
         .then(quiz => {
             if (!quiz) {
@@ -243,13 +245,14 @@ exports.quitCmd = (socket,rl) => {
  */
 
 exports.testCmd = (socket,rl,id) => {
-    validateId(id)
+    validateId(id,socket)
         .then(id => models.quiz.findById(id))
         .then(quiz => {
             if (!quiz) {
+                errorlog(socket,`No existe un quiz asociado al id=${id}.`);
                 throw new Error(`No existe un quiz asociado al id=${id}.`);
             }
-            else return makeQuestion(rl, quiz.question)
+             return makeQuestion(rl, quiz.question)
                 .then(answer => {
 
                     respuesta = answer.toLowerCase().trim();
@@ -267,7 +270,7 @@ exports.testCmd = (socket,rl,id) => {
 
         })
         .catch(error => {
-             errorlog(socket,error.message);
+            errorlog(socket,error.message);
 
         })
         .then(() => {
