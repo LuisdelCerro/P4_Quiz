@@ -247,8 +247,7 @@ exports.testCmd = (socket,rl,id) => {
         .then(id => models.quiz.findById(id))
         .then(quiz => {
             if (!quiz) {
-                errorlog(socket, `No existe un quiz asociado al id=${id}.`);
-                rl.prompt();
+                throw new Error(`No existe un quiz asociado al id=${id}.`);
             }
             else return makeQuestion(rl, quiz.question)
                 .then(answer => {
